@@ -12,13 +12,28 @@ class nGramModel():
         into bigram model"""
 
     def countbigram(self, line):
-        line = line.split(';')
+
+        # Open the file and load the essay into memory
         file = open("./essays/" + line[0])
         essay = file.read()
-        print(essay)
+
+        # Tag the POS
+        essay = essay.split()
+        tags = nltk.pos_tag(essay)
+
+        # Count the tags
+        for tag in tags:
+            if "high" in line[2]:
+                print("high")
+
+            else :
+                print("low")
+
         return;
 
+
     """Load the training essays"""
+
     def __init__(self):
         """ Import the table of contents """
         toc = open("./index.csv", 'r')
@@ -29,6 +44,7 @@ class nGramModel():
         lines.pop(0)
 
         for line in lines:
+            line =  line.split(';')
             self.countbigram(line)
 
         return;

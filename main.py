@@ -7,19 +7,31 @@ import nltk.corpus
 
 class classStats():
 
-    wordCount = dict()
-    bigramCount = dict()
+
+    wordCount = dict()      #Unique word / tag pairs
+    bigramCount = dict()    #Unique tag/tag pairs
+    tagCount = dict()       #Unique tags
+    uniqueWords = 0
+
 
     def __init__(self):
         return;
 
+
+
     """ Count bigrams """
     def countBigram(self, tag1, tag2):
+        # Count Pairs
         if (tag1, tag2) in self.bigramCount:
             self.bigramCount[(tag1, tag2)] = self.bigramCount[(tag1, tag2)] + 1
-
         else:
             self.bigramCount[(tag1, tag2)] = 1
+
+        # Count individual tags
+        if tag1 in self.tagCount:
+            self.tagCount[tag1] = self.tagCount[tag1] + 1
+        else:
+            self.tagCount[tag1] = 1
 
         return;
 
@@ -73,6 +85,18 @@ class classStats():
 
         return;
 
+    # Return bigram probability
+    def bigramProbabilityTag(self, currTag, prevTag):
+        bigramCount = 0
+        prevCount = 0
+
+        bigramCount = self.bigramCount[(prevTag, currTag)]
+        prevCount = self.tagCount[prevTag]
+
+        return (bigramCount + 1) / (prevCount + self.uniqueWords)
+
+    # Return
+
 """ Read the corpus of essays and categorize the words and POS found """
 
 class nGramModel():
@@ -107,6 +131,9 @@ class nGramModel():
             else:
                 self.lowStats.countBigram(tag1[1], tag2[1])
 
+        # Now that all words and bigrams have been counted store the probabilities
+
+
         return;
 
 
@@ -127,14 +154,40 @@ class nGramModel():
             self.countbigram(line)
 
         # Print my counts for debugging
-        self.highStats.printAll()
-        self.highStats.printBigrams()
+        # self.highStats.printAll()
+        # self.highStats.printBigrams()
 
         return;
 
 
 
 if __name__ == "__main__":
-    print("hello world\n")
-
     f = nGramModel()
+
+    while 1:
+
+        filename = input("Welcome to the essay scorer. Enter the filename of the essay to score or q to quit: ")
+
+        if filename == "q":
+            print("Goodbye")
+            break
+
+        try:
+            file = open("./essays/"+filename)
+
+        except:
+            print(filename + " not found. ")
+            continue
+
+        # We can declare classes to run our tests here
+        # and then combine the score
+
+
+        essay = file.read()
+        essay = essay.split()
+        tags = nltk.pos_tag(essay)
+        print(tags)
+
+
+
+    return;

@@ -13,6 +13,7 @@ class classStats():
     def __init__(self):
         return;
 
+    """ Stripping words of punctuation and sent to lower case for accurate counts"""
     def cleanWord(self, word):
         word = word.casefold()
 
@@ -21,6 +22,7 @@ class classStats():
 
         return word;
 
+    """ Add words to the dictionary """
     def addWord(self, word, tag):
         word = self.cleanWord(word)
 
@@ -32,8 +34,23 @@ class classStats():
 
         return;
 
+    """ Print all word productions probability """
     def printAll(self):
-        print(classStats.wordCount)
+        for pairs in self.wordCount:
+            print(pairs, " ", self.productionProb(pairs[0], pairs[1]))
+        return;
+
+    """ Return lexical production probability """
+    def productionProb(self, word, tag):
+        word = self.cleanWord(word)
+        wordCount = self.wordCount[(word, tag)]
+        tagCount = 0
+
+        for pairs in self.wordCount:
+            if pairs[1] == tag:
+                tagCount += self.wordCount[pairs]
+
+        return wordCount / tagCount
 
 """ Read the corpus of essays and categorize the words and POS found """
 
@@ -62,9 +79,7 @@ class nGramModel():
                 nGramModel.highStats.addWord(tag[0], tag[1])
 
             else :
-                print("low")
-
-        nGramModel.highStats.printAll()
+                nGramModel.lowStats.addWord(tag[0], tag[1])
 
         return;
 
@@ -83,6 +98,8 @@ class nGramModel():
         for line in lines:
             line =  line.split(';')
             self.countbigram(line)
+
+        self.highStats.printAll()
 
         return;
 

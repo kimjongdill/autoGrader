@@ -13,6 +13,16 @@ class classStats():
     def __init__(self):
         return;
 
+    """ Count bigrams """
+    def countBigram(self, tag1, tag2):
+        if (tag1, tag2) in self.bigramCount:
+            self.bigramCount[(tag1, tag2)] = self.bigramCount[(tag1, tag2)] + 1
+
+        else:
+            self.bigramCount[(tag1, tag2)] = 1
+
+        return;
+
     """ Stripping words of punctuation and sent to lower case for accurate counts"""
     def cleanWord(self, word):
         word = word.casefold()
@@ -52,6 +62,17 @@ class classStats():
 
         return wordCount / tagCount
 
+    """ Return POS production probability"""
+    def posProb(self, unknownTag, givenTag):
+        return;
+
+    """ Print all bigram counts """
+    def printBigrams(self):
+        for pairs in self.bigramCount:
+            print(pairs, " ", self.bigramCount[pairs])
+
+        return;
+
 """ Read the corpus of essays and categorize the words and POS found """
 
 class nGramModel():
@@ -76,10 +97,15 @@ class nGramModel():
         for tag in tags:
             if "high" in line[2]:
                 #print(tag[0] + tag[1])
-                nGramModel.highStats.addWord(tag[0], tag[1])
-
+                self.highStats.addWord(tag[0], tag[1])
             else :
-                nGramModel.lowStats.addWord(tag[0], tag[1])
+                self.lowStats.addWord(tag[0], tag[1])
+
+        for tag1, tag2 in zip(tags[0:len(tags)-1], tags[1:]):
+            if "high" in line[2]:
+                self.highStats.countBigram(tag1[1], tag2[1])
+            else:
+                self.lowStats.countBigram(tag1[1], tag2[1])
 
         return;
 
@@ -93,13 +119,16 @@ class nGramModel():
         # Import the table of contents
         lines = toc.readlines()
 
+        # Skip the title line
         lines.pop(0)
 
         for line in lines:
             line =  line.split(';')
             self.countbigram(line)
 
+        # Print my counts for debugging
         self.highStats.printAll()
+        self.highStats.printBigrams()
 
         return;
 

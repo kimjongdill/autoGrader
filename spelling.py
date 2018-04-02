@@ -13,16 +13,12 @@
 
 import nltk
 from nltk.corpus import words
-#from nltk.corpus import wordnet as wn
-from nltk.stem.snowball import SnowballStemmer
 import string
 
-#print(words.words())
 
 class Spelling():
     numErrors = 0
     dictionary = dict()
-    stemmer = SnowballStemmer("english")
 
     """ Check for punctuation """
     def isPunct(self, c):
@@ -133,17 +129,8 @@ class Spelling():
                     # Handle regular plurals and 'ed' endings
                     newWord = self.stripEnding(word)
 
-                    # Stem word and see if its root is in the dictionary
-                    # newWord = self.stemmer.stem(word)
                     if newWord in self.dictionary:
                         continue
 
                     print(word)
                     self.numErrors += 1
-
-            """
-            # Look for word in wordNet
-            if not wn.synset(word):
-                print(word)
-                self.numErrors += 1
-            """

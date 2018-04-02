@@ -1,3 +1,16 @@
+#
+#  Class spelling.py by George Dill 2-Apr-2018
+#  Class compares given words to OpenOffice dictionary and counts the
+#  word as incorrect if it is not found.
+#
+#  Corrections are made for inflections, as the OpenOffice dictionary
+#  does not explicitly list them.
+#
+#  Proper capitalisation of words is not checked.
+#
+
+
+
 import nltk
 from nltk.corpus import words
 #from nltk.corpus import wordnet as wn

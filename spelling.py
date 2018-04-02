@@ -21,11 +21,13 @@ class Spelling():
     # Put corpus in hash map to speed up search
     def __init__(self):
         for word in words.words():
+            # Lets not bother with capitalisation just yet
+            word = word.lower()
             self.dictionary[word] = True
 
     def doubleConsonant(self, word):
         if word[-1] == word[-2]:
-            newWord = word[:-2]
+            newWord = word[:-1]
             if newWord in self.dictionary:
                 return newWord
         return word;
@@ -50,11 +52,15 @@ class Spelling():
 
         # Plural s
         elif "s" in word[-1:]:
-            word = word[:-1];
+            word = word[:-1]
+            # Strip tailing e if required
+            if word not in self.dictionary:
+                word = word[:-1]
+
 
         # Past tense "ed"
         elif "ed" in word[-2:]:
-            word = word[:-2];
+            word = word[:-2]
             word = self.doubleConsonant(word)
             if word not in self.dictionary:
                 word = word + "e"
@@ -84,9 +90,11 @@ class Spelling():
             tag = pair[1]
             wList = []
 
-            # Clean word for the dictionary
-            if tag is not "NNP":
-                word = word.casefold()
+            # If word is a number, skip
+            if "CD" == tag:
+                continue
+
+            word = word.lower()
 
             # Remove trailing punctuation
             while(self.isPunct(word[len(word)-1]) and len(word) > 1):

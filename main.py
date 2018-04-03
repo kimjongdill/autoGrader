@@ -30,7 +30,7 @@ if __name__ == "__main__":
         essay = essay.split()
         tags = nltk.pos_tag(essay)
         spell = Spelling()
-        spell.spellCheck(tags)
+        print(spell.spellCheck(tags))
 
         #print(tags)
 

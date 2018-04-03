@@ -8,8 +8,7 @@
 #
 #  Proper capitalisation of words is not checked.
 #
-
-
+#
 
 import nltk
 from nltk.corpus import words
@@ -18,6 +17,7 @@ import string
 
 class Spelling():
     numErrors = 0
+    numWords = 0
     dictionary = dict()
 
     """ Check for punctuation """
@@ -90,7 +90,10 @@ class Spelling():
 
         return word;
 
-    """ Checking spelling """
+    """ Checking spelling 
+        Returns the % incorrect spelling errors 
+    """
+
     def spellCheck(self, text):
         self.numErrors = 0
         for pair in text:
@@ -120,7 +123,7 @@ class Spelling():
             # Look for word in dictionary
 
             for word in wList:
-
+                self.numWords += 1
                 # Skip if word is whitespace
                 if word.isspace() or len(word) == 0:
                     continue
@@ -132,5 +135,21 @@ class Spelling():
                     if newWord in self.dictionary:
                         continue
 
-                    print(word)
+                    #Print the word for debugging
+                    #print(word)
                     self.numErrors += 1
+
+        pcError = 100 * self.numErrors / self.numWords
+
+        if pcError > 5.0 :
+            return 4;
+        elif pcError > 4.0 :
+            return 3;
+        elif pcError > 3.0 :
+            return 3;
+        elif pcError > 2.0 :
+            return 2;
+        elif pcError > 1.0 :
+            return 1
+        else:
+            return 0;

@@ -1,0 +1,48 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib
+from spelling import Spelling
+import nltk
+
+#
+#  ScoreSpelling plots all spelling scores against
+#  low / high values for essays.
+#  It appears that both low and high value essays have
+#  Spelling errors of up to 5% misspelled. However,
+#  only low scored essays exceed 5%.
+#
+
+
+
+if __name__ == "__main__":
+
+    spellScores = []
+
+    # Import the table of contents
+    toc = open("./index.csv", 'r')
+
+    # Import the table of contents
+    lines = toc.readlines()
+
+    # Skip the title line
+    lines.pop(0)
+
+    for line in lines:
+        line = line.split(';')
+        file = "./essays/" + line[0]
+        score = line[2]
+
+        if "high"  in score:
+            score = 1
+        else:
+            score = 0
+
+        essayFile = open(file, 'r')
+        essay = essayFile.read()
+        essay = essay.split()
+        tags = nltk.pos_tag(essay)
+        spell = Spelling()
+        plt.scatter(spell.spellCheck(tags), score)
+        print
+
+    plt.show()

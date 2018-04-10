@@ -6,7 +6,7 @@ from spelling import Spelling
 
 
 if __name__ == "__main__":
-    f = bigram.nGramModel()
+    #f = bigram.nGramModel()
 
     while 1:
 
@@ -29,6 +29,8 @@ if __name__ == "__main__":
         essay = file.read()
         essay = essay.split()
         tags = nltk.pos_tag(essay)
+
+
         spell = Spelling()
         print(spell.spellCheck(tags))
 

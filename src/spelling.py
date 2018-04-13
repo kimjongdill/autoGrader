@@ -94,7 +94,10 @@ class Spelling():
         Returns the % incorrect spelling errors 
     """
 
-    def spellCheck(self, text):
+    def spellCheck(self, essay):
+        text = essay.split()
+        text = nltk.pos_tag(text)
+
         self.numErrors = 0
         for pair in text:
             # Split the word / tag pair
@@ -135,8 +138,6 @@ class Spelling():
                     if newWord in self.dictionary:
                         continue
 
-                    #Print the word for debugging
-                    #print(word)
                     self.numErrors += 1
 
         pcError = 100 * self.numErrors / self.numWords

@@ -1,9 +1,7 @@
-import nltk
-import string
-import bigram
-import nltk.corpus
-from spelling import Spelling
-
+#import sys
+#sys.path.insert(0, '../src')
+from src.spelling import Spelling
+from src.subjectVerbAgreement import SubjVerbAgreement
 
 if __name__ == "__main__":
     #f = bigram.nGramModel()
@@ -17,7 +15,7 @@ if __name__ == "__main__":
             break
 
         try:
-            file = open("./essays/"+filename)
+            file = open("./input/testing/essays/"+filename)
 
         except:
             print(filename + " not found. ")
@@ -26,13 +24,15 @@ if __name__ == "__main__":
         # We can declare classes to run our tests here
         # and then combine the score
 
+        # Read the essay from file, let testers tokenize as necessary.
         essay = file.read()
-        essay = essay.split()
-        tags = nltk.pos_tag(essay)
-
 
         spell = Spelling()
-        print(spell.spellCheck(tags))
+        sva = SubjVerbAgreement()
+
+        print("Spelling score (0-4): " + str(spell.spellCheck(essay)))
+        print("Grammar score (5-0): " + str(sva.scoreAgreement(essay)))
+
 
         #print(tags)
 

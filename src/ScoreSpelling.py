@@ -1,8 +1,7 @@
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
-from spelling import Spelling
 import nltk
+
+from src.spelling import Spelling
 
 #
 #  ScoreSpelling plots all spelling scores against

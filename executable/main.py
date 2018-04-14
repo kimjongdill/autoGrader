@@ -1,7 +1,8 @@
 #import sys
 #sys.path.insert(0, '../src')
 from src.spelling import Spelling
-from src.subjectVerbAgreement import SubjVerbAgreement
+from src.subjectVerbAgreement import SubjVerbAgreement as sva
+from src.sCount import SentenceCount
 
 if __name__ == "__main__":
     #f = bigram.nGramModel()
@@ -28,10 +29,11 @@ if __name__ == "__main__":
         essay = file.read()
 
         spell = Spelling()
-        sva = SubjVerbAgreement()
+        stc = SentenceCount()
 
-        print("Spelling score (0-4): " + str(spell.spellCheck(essay)))
-        print("Grammar score (5-0): " + str(sva.scoreAgreement(essay)))
+        #print("Spelling score (0-4): " + str(spell.spellCheck(essay)))
+        print("Sentence Count: ", stc.scoreSentenceCount(essay))
+        # print("Grammar score (5-0): " + str(sva.scoreAgreement(essay)))
 
 
         #print(tags)

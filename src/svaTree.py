@@ -42,63 +42,6 @@ class SubjVerbAgreement():
         text = text.replace("  ", " ")
         return text;
 
-    # Dec agreement by tracking subjects and then first occurance of verb
-
-    def decAgreement(self, sentence):
-        tokens = nltk.word_tokenize(sentence)
-        pos = nltk.pos_tag(tokens)
-        #print(pos)
-
-        subjects= []
-        headVerb = False
-        agreement = True
-
-        for tag in pos:
-            print(tag)
-            tag = (tag[0].casefold(), tag[1])
-
-            if tag[1] == "NN" or tag[1] == "NNP" or  tag[1] == "NNS" or \
-                    tag[1] == "NNPS" or tag[1] == "PRP":
-                subjects.insert(0, tag)
-
-            if tag[1] == "VBG":
-                subjects.insert(0, tag)
-
-            # For the second half of a compound sentence clear and check agreement again.
-            if tag[1] == "CC" or tag[1] == "IN" or tag[1] == "," and headVerb:
-                subjects.clear()
-                headVerb = False
-
-            if tag[1] == "VBD":
-                headVerb = True
-                if len(subjects) is 0:
-                    return False;
-
-            if tag[1] == "VBZ":
-                headVerb = True
-                # If there is more than one subject, this should be plural
-                if len(subjects) > 1 or len(subjects) == 0:
-                    return False
-
-                # Check for third person
-                for subject in subjects:
-                    if subject[0] == "i" or subject[0] == "we" or subject[0] == "they":
-                        return False;
-
-            # Non Third Person Singular
-            if tag[1] == "VBP":
-                headVerb = True
-                if len(subjects) is 0:
-                    return False;
-                if tag[0] == "am" and not subjects[0][0] == "i" and len(subjects) > 1:
-                    return False;
-                if tag[0] == "are" and subjects[0][0] == "i" and len(subjects) == 1:
-                    return False;
-                if "s" in tag[0][-1]:
-                    return False;
-
-
-        return agreement
 
     def scoreAgreement(self, essay):
 
@@ -123,12 +66,133 @@ class SubjVerbAgreement():
 
     def rec_agreement(self, tree):
         # End recursion at leaf node
+
+        verb = ["", 0]
+        noun = ""
+        errorCount = 0
+
         if type(tree[0]) is str:
-            print(tree[0], " ")
-            return;
+            return 0;
+
+
         for node in tree:
-            self.rec_agreement(node)
-        return;
+            if node._label == "NP":
+                noun = self.getNounAgreement(node)
+
+            elif node._label == "VP":
+                verb = self.getVerbAgreement(node)
+
+            else:
+                errorCount = self.rec_agreement(node)
+
+
+        errorCount += verb[1]
+        verb = verb[0]
+
+        if verb in ["VB", "VBD", "MD"]:
+            return errorCount;
+
+        if verb == "AM":
+            if noun == "I":
+                return errorCount;
+
+        if verb == "VBP":
+            if noun in ["NN", "I", "NNS"]:
+                return errorCount;
+
+        if verb == "VBZ":
+            if noun == "NN":
+                return errorCount;
+
+        if noun == "":
+            return errorCount;
+
+        if verb == "":
+            return errorCount;
+
+        #tree.pretty_print()
+        return errorCount + 1;
+
+    def getNounAgreement(self, tree):
+
+        labels = []
+        count = 0
+
+        # Base case - Handle PRPs otherwise return whatever.
+        if type(tree[0]) is str:
+            word = tree[0].casefold()
+
+            if word == "i":
+                return "I"
+
+            if word in ["we", "they"]:
+                return "NNS"
+
+            if tree._label == "PRP":
+                return "NN"
+
+            return tree._label
+
+        for node in tree:
+            labels.append(self.getNounAgreement(node))
+
+        if len(labels) == 1:
+            return labels[0]
+
+        for label in labels:
+            if label in ["NNS", "NNPS"]:
+                return "NNS"
+
+            if label in ["NNP", "NN", "I"]:
+                count += 1
+
+        if count == 1 and "I" in labels:
+            return "I"
+
+        if count == 1:
+            return "NN"
+
+        return "NNS"
+
+
+    def getVerbAgreement(self,tree):
+
+        labels = []
+        countError = 0
+
+        if type(tree[0]) is str:
+            if tree[0] == "am":
+                return ["AM", 0]
+            return [tree._label, 0];
+
+        for node in tree:
+            if node._label == "S":
+                 countError += self.rec_agreement(node)
+            else:
+                tag = self.getVerbAgreement(node)
+                labels.append(tag[0])
+                countError += tag[1]
+
+        try:
+
+            if labels[0] == "MD":
+                if len(labels) > 1:
+                    if labels[1] in ["VBZ", "VBP", "AM", "VBD"]:
+                        return [labels[1], countError + 1]
+
+
+            """if len(labels) > 1:
+                if labels[1] == "VBN":
+                    if not labels[0] in ["VBZ", "VBP", "AM", "VBD"]:
+                        print("Error - bad past participal")
+                        return [labels[0], countError + 1]
+            """
+
+            return [labels[0], countError]
+
+        except:
+
+            return ["", countError]
 
     def treeAgreement(self, essay):
 
@@ -144,8 +208,11 @@ class SubjVerbAgreement():
             (parse, ) = self.parser.raw_parse(sentence)
             # Now we have a parse tree. We can check subject verb agreement for
             # Every S->NP VP in the tree.
-            parse.pretty_print()
-            self.rec_agreement(parse)
+            #parse.pretty_print()
+            errorCount += self.rec_agreement(parse)
+            print(errorCount)
+
+        return errorCount
 
 
 if __name__ == "__main__":
@@ -157,7 +224,7 @@ if __name__ == "__main__":
     # But those shouldn't really be in academic writing...
 
     sva = SubjVerbAgreement()
-    sva.treeAgreement(userSentence)
+    print("Errors: ", sva.treeAgreement(userSentence))
     #sva.scoreAgreement(userSentence)
     print("goodbye")
 

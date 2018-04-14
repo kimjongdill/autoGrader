@@ -3,6 +3,7 @@
 from src.spelling import Spelling
 from src.subjectVerbAgreement import SubjVerbAgreement as sva
 from src.sCount import SentenceCount
+from src.svaTree import SubjVerbAgreement
 
 if __name__ == "__main__":
     #f = bigram.nGramModel()
@@ -16,7 +17,7 @@ if __name__ == "__main__":
             break
 
         try:
-            file = open("./input/testing/essays/"+filename)
+            file = open("../input/testing/essays/"+filename)
 
         except:
             print(filename + " not found. ")
@@ -30,9 +31,11 @@ if __name__ == "__main__":
 
         spell = Spelling()
         stc = SentenceCount()
+        sva = SubjVerbAgreement()
 
         #print("Spelling score (0-4): " + str(spell.spellCheck(essay)))
         print("Sentence Count: ", stc.scoreSentenceCount(essay))
+        print("Bad SVA Count: ", sva.treeAgreement(essay))
         # print("Grammar score (5-0): " + str(sva.scoreAgreement(essay)))
 
 

@@ -1,7 +1,4 @@
 import nltk
-import string
-import re
-import stanfordcorenlp
 
 # Reference:
 # Yuzhu Wang, Hai Zhao, and Dan Shi. 2015. "A Light Rule-based Approach to English Subject-Verb Agreement Errors
@@ -24,6 +21,14 @@ import stanfordcorenlp
 #   - S -> VP           // Command
 
 # Start with just one sentence
+
+class featureStruct():
+    word = ""
+    person = ""
+    specialVerb = ""
+    tag = ""
+    plural = ""
+
 
 class SubjVerbAgreement():
 
@@ -71,8 +76,8 @@ class SubjVerbAgreement():
     def rec_agreement(self, tree):
         # End recursion at leaf node
 
-        verb = ""
-        noun = ""
+        verb = featureStruct()
+        noun = featureStruct()
         errorCount = 0
 
         if type(tree[0]) is str:
@@ -89,29 +94,25 @@ class SubjVerbAgreement():
             else:
                 self.rec_agreement(node)
 
-        if verb in ["VB", "VBD", "MD"]:
+        if verb.tag in ["VB", "VBD", "MD"]:
             return;
 
-        if verb == "AM":
-            if noun == "I":
-                return;
-
-        if verb == "ARE":
-            if noun in ["2NN", "2NNS"]:
+        if verb.specialVerb == "BE":
+            if (noun.tag == "I" and verb.word == "am") or noun.person != 1 and verb.word == "are" :
                 return;
 
         if verb == "VBP":
-            if noun in ["2NN", "I"]:
+            if noun.tag in ["2NN", "I", "2NNS"]:
                 return;
 
         if verb == "VBZ":
-            if noun == "NN":
+            if noun.tag == "NN":
                 return;
 
-        if noun == "":
+        if noun.tag == "":
             return;
 
-        if verb == "":
+        if verb.tag == "":
             return;
 
         #tree.pretty_print()
@@ -126,20 +127,29 @@ class SubjVerbAgreement():
         # Base case - Handle PRPs otherwise return whatever.
         if type(tree[0]) is str:
             word = tree[0].casefold()
+            fs = featureStruct()
+            fs.word = word
+            fs.tag = tree._label
+            fs.person = 3
 
             if word == "i":
-                return "I"
+                fs.person = 1
+                fs.plural = 0
+                fs.tag = "I"
 
-            if word == "you":
-                return "2NN"
+            elif word == "you":
+                fs.person = 2
+                fs.plural = 0
 
-            if word in ["we", "they"]:
-                return "2NNS"
+            elif word in ["we", "they"]:
+                fs.person = 2
+                fs.plural = 1
 
-            if tree._label == "PRP":
-                return "NN"
+            elif tree._label == "PRP":
+                fs.person = 3
+                fs.plural = 0
 
-            return tree._label
+            return fs
 
         for node in tree:
             labels.append(self.getNounAgreement(node))
@@ -148,19 +158,24 @@ class SubjVerbAgreement():
             return labels[0]
 
         for label in labels:
-            if label in ["NNS", "NNPS"]:
-                return "NNS"
+            if label.tag in ["NNS", "NNPS"]:
+                return label
 
-            if label in ["NNP", "NN", "I"]:
+            if label.tag in ["NNP", "NN", "I"]:
                 count += 1
 
-        if count == 1 and "I" in labels:
-            return "I"
-
         if count == 1:
-            return "NN"
+            return labels[0]
 
-        return "NNS"
+        fs = featureStruct()
+        for label in labels:
+            if "NN" in label.tag:
+                fs.word += label.word
+
+        fs.tag = "NNS"
+        fs.plural = 1
+
+        return fs
 
 
     def getVerbAgreement(self,tree):
@@ -169,13 +184,24 @@ class SubjVerbAgreement():
         countError = 0
 
         if type(tree[0]) is str:
-            if tree[0] == "am":
-                return "AM"
+            word = tree[0].casefold()
+            fs = featureStruct()
+            fs.word = word
+            fs.tag = tree._label
+
+            if word == "am":
+                fs.specialVerb = "BE"
+                return fs
 
             if tree[0] == "are":
-                return "ARE"
+                fs.specialVerb = "BE"
+                return fs
 
-            return tree._label;
+            if tree[0] in ["has", "have", "had"]:
+                fs.specialVerb = "HAVE"
+                return fs
+
+            return fs
 
         for node in tree:
             if node._label == "S":
@@ -185,20 +211,20 @@ class SubjVerbAgreement():
                 labels.append(verb)
 
         try:
-
+            # Check for modal errors. Verbs following modal should be root
             if labels[0] == "MD":
                 if len(labels) > 1:
-                    if labels[1] in ["VBZ", "VBP", "AM", "VBD"]:
+                    if labels[1].tag in ["VBZ", "VBP", "AM", "VBD"]:
                         self.verbError += 1
                         return labels[1]
 
-
-            """if len(labels) > 1:
-                if labels[1] == "VBN":
-                    if not labels[0] in ["VBZ", "VBP", "AM", "VBD"]:
-                        print("Error - bad past participal")
-                        return [labels[0], countError + 1]
-            """
+            # Past participal Errors
+            if len(labels) > 1:
+                if labels[1].tag == "VBN":
+                    if labels[0].tag is "RB":
+                        return labels[1]
+                    elif not labels[0].specialVerb == "HAVE":
+                        self.verbError += 1
 
             return labels[0]
 

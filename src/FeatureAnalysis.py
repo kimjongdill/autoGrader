@@ -34,11 +34,13 @@ class FeatureStruct():
         if self.tag in ["NN", "NNP", "PRP"]:
             self.plural = 0
             self.noun = 1
+            self.person = 3
 
         # Mark Plural Nouns
         if self.tag in ["NNS", "NNPS"]:
             self.plural = 1
             self.noun = 1
+            self.person = 3
 
         # Mark Verbs
         if self.tag == "VBP":
@@ -131,11 +133,21 @@ class FeatureStruct():
 
         # For Verb Phrases identify head verb, plural person
         elif fs.tag == "VP":
-            fs.headVerb = labels[0].headVerb
-            fs.specialVerb = labels[0].specialVerb
-            fs.plural = labels[0].specialVerb
-            fs.person = labels[0].person
+            if len(labels) == 1:
+                fs.headVerb = labels[0].headVerb
+                fs.specialVerb = labels[0].specialVerb
+                fs.plural = labels[0].specialVerb
+                fs.person = labels[0].person
 
+            for label in labels:
+                if not label.headVerb == "":
+                    label.svaError = fs.svaError
+                    label.verbError = fs.verbError
+                    label.word = fs.word
+                    label.tag = fs.tag
+                    return label
+
+            fs.verbError += 1
             # Check for verb errors
 
         # For S and others Merge what is left
@@ -157,18 +169,39 @@ class FeatureStruct():
             if np == "" or vp == "":
                 return fs
 
-            # Check that verb matches person agreement
-            if vp.headVerb in ["VBZ, VBP"]:
-                if vp.person != "" and np.person < vp.person:
-                    fs.svaError += 1
-
             # Handle Be - verbs
             if vp.specialVerb == "BE":
-                if np.person != vp.person:
+                # I must come with am
+                if vp.person == 1:
+                    if np.person != 1:
+                        fs.svaError += 1
+
+                # Are must come with second person or 3rd person plural
+                if vp.person == 2:
+                    if np.person == 3 and np.plural == 0:
+                        fs.svaError += 1
+                    if np.person == 1:
+                        fs.svaError += 1
+
+                # 3rd person plural is
+                if vp.person == 3:
+                    if np.person != 3:
+                        fs.svaError += 1
+                    elif np.plural == 1:
+                        fs.svaError += 1
+
+
+            # Check that verb matches person agreement
+            elif vp.headVerb == "VBZ":
+                if not np.person == 3:
+                    fs.svaError += 1
+
+            elif vp.headVerb == "VBP":
+                if np.person == 3:
                     fs.svaError += 1
 
             # Handle Head Verbs that shouldn't be there.
-            if vp.headVerb == "":
+            elif vp.headVerb == "":
                 fs.svaError += 1
 
         return fs
@@ -200,17 +233,20 @@ class FeatureAnalysis():
         # Ensure that punctuation has proper spacing
         cleanEssay = self.preProcess(essay)
         sentences = nltk.sent_tokenize(cleanEssay)
+        svaCount = 0
 
         for sentence in sentences:
-            print(sentence)
+            #print(sentence)
             (parse, ) = self.parser.raw_parse(sentence)
 
             # Now we have a parse tree. We can check subject verb agreement for
             # Every S->NP VP in the tree.
-            parse.pretty_print()
+            #parse.pretty_print()
             fs = self.buildFeature(parse)
+            svaCount += fs.svaError
+            #print(svaCount)
 
-        return fs
+        return svaCount / len(sentences)
 
     # Take a parse tree and recursively build feature structures
     def buildFeature(self, tree):
@@ -230,7 +266,7 @@ class FeatureAnalysis():
         fs = FeatureStruct()
         fs = fs.merge(tree, structures)
 
-        fs.print()
+        #fs.print()
         return fs;
 
 if __name__ == "__main__":
@@ -242,6 +278,6 @@ if __name__ == "__main__":
     # But those shouldn't really be in academic writing...
     feature = FeatureAnalysis()
     fs = feature.analyze(userSentence)
-    print("Errors: ", fs.svaError)
+    print("Errors: ", fs)
     print("goodbye")
 

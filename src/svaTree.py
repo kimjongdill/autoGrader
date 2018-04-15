@@ -94,6 +94,9 @@ class SubjVerbAgreement():
             else:
                 self.rec_agreement(node)
 
+        if verb == "":
+            return;
+
         if verb.tag in ["VB", "VBD", "MD"]:
             return;
 
@@ -236,22 +239,23 @@ class SubjVerbAgreement():
 
         sentenceCount = 0
         errorCount = 0
-
+        self.svaError = 0
+        self.verbError = 0
         # Ensure that punctuation has proper spacing
         cleanEssay = self.preProcess(essay)
         sentences = nltk.sent_tokenize(cleanEssay)
 
         for sentence in sentences:
-            print(sentence)
+            #print(sentence)
             (parse, ) = self.parser.raw_parse(sentence)
             # Now we have a parse tree. We can check subject verb agreement for
             # Every S->NP VP in the tree.
-            parse.pretty_print()
+            #parse.pretty_print()
             self.rec_agreement(parse)
-            print("svaError: ", self.svaError)
-            print("verbError: ", self.verbError)
+            #print("svaError: ", self.svaError)
+            #print("verbError: ", self.verbError)
 
-        return errorCount
+        return self.svaError / len(sentences)
 
 
 if __name__ == "__main__":

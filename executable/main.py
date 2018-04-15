@@ -4,6 +4,7 @@ from src.spelling import Spelling
 from src.subjectVerbAgreement import SubjVerbAgreement as sva
 from src.sCount import SentenceCount
 from src.svaTree import SubjVerbAgreement
+from src.FeatureAnalysis import FeatureAnalysis
 
 if __name__ == "__main__":
     #f = bigram.nGramModel()
@@ -31,11 +32,11 @@ if __name__ == "__main__":
 
         spell = Spelling()
         stc = SentenceCount()
-        sva = SubjVerbAgreement()
+        feat = FeatureAnalysis()
 
-        #print("Spelling score (0-4): " + str(spell.spellCheck(essay)))
+        print("Spelling score (0-4): " + str(spell.spellCheck(essay)))
         print("Sentence Count: ", stc.scoreSentenceCount(essay))
-        print("Bad SVA Count: ", sva.treeAgreement(essay))
+        print("Bad SVA Count: ", feat.analyze(essay))
         # print("Grammar score (5-0): " + str(sva.scoreAgreement(essay)))
 
 

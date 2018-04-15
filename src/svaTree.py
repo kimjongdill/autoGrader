@@ -28,10 +28,14 @@ import stanfordcorenlp
 class SubjVerbAgreement():
 
     parser = ""
+    svaError = 0
+    verbError = 0
 
 
     def __init__(self):
         self.parser = nltk.CoreNLPParser(url="http://localhost:9000")
+        self.svaError = 0
+        self.verbError = 0
         return;
 
     # Comb through text and ensure that periods and commas have a space after them.
@@ -67,7 +71,7 @@ class SubjVerbAgreement():
     def rec_agreement(self, tree):
         # End recursion at leaf node
 
-        verb = ["", 0]
+        verb = ""
         noun = ""
         errorCount = 0
 
@@ -83,35 +87,36 @@ class SubjVerbAgreement():
                 verb = self.getVerbAgreement(node)
 
             else:
-                errorCount = self.rec_agreement(node)
-
-
-        errorCount += verb[1]
-        verb = verb[0]
+                self.rec_agreement(node)
 
         if verb in ["VB", "VBD", "MD"]:
-            return errorCount;
+            return;
 
         if verb == "AM":
             if noun == "I":
-                return errorCount;
+                return;
+
+        if verb == "ARE":
+            if noun in ["2NN", "2NNS"]:
+                return;
 
         if verb == "VBP":
-            if noun in ["NN", "I", "NNS"]:
-                return errorCount;
+            if noun in ["2NN", "I"]:
+                return;
 
         if verb == "VBZ":
             if noun == "NN":
-                return errorCount;
+                return;
 
         if noun == "":
-            return errorCount;
+            return;
 
         if verb == "":
-            return errorCount;
+            return;
 
         #tree.pretty_print()
-        return errorCount + 1;
+        self.svaError += 1
+        return;
 
     def getNounAgreement(self, tree):
 
@@ -125,8 +130,11 @@ class SubjVerbAgreement():
             if word == "i":
                 return "I"
 
+            if word == "you":
+                return "2NN"
+
             if word in ["we", "they"]:
-                return "NNS"
+                return "2NNS"
 
             if tree._label == "PRP":
                 return "NN"
@@ -162,23 +170,27 @@ class SubjVerbAgreement():
 
         if type(tree[0]) is str:
             if tree[0] == "am":
-                return ["AM", 0]
-            return [tree._label, 0];
+                return "AM"
+
+            if tree[0] == "are":
+                return "ARE"
+
+            return tree._label;
 
         for node in tree:
             if node._label == "S":
-                 countError += self.rec_agreement(node)
+                 self.rec_agreement(node)
             else:
-                tag = self.getVerbAgreement(node)
-                labels.append(tag[0])
-                countError += tag[1]
+                verb = self.getVerbAgreement(node)
+                labels.append(verb)
 
         try:
 
             if labels[0] == "MD":
                 if len(labels) > 1:
                     if labels[1] in ["VBZ", "VBP", "AM", "VBD"]:
-                        return [labels[1], countError + 1]
+                        self.verbError += 1
+                        return labels[1]
 
 
             """if len(labels) > 1:
@@ -188,11 +200,11 @@ class SubjVerbAgreement():
                         return [labels[0], countError + 1]
             """
 
-            return [labels[0], countError]
+            return labels[0]
 
         except:
 
-            return ["", countError]
+            return ""
 
     def treeAgreement(self, essay):
 
@@ -208,9 +220,10 @@ class SubjVerbAgreement():
             (parse, ) = self.parser.raw_parse(sentence)
             # Now we have a parse tree. We can check subject verb agreement for
             # Every S->NP VP in the tree.
-            #parse.pretty_print()
-            errorCount += self.rec_agreement(parse)
-            print(errorCount)
+            parse.pretty_print()
+            self.rec_agreement(parse)
+            print("svaError: ", self.svaError)
+            print("verbError: ", self.verbError)
 
         return errorCount
 

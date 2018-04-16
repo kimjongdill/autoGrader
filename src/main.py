@@ -1,10 +1,10 @@
-#import sys
-#sys.path.insert(0, '../src')
-from src.spelling import Spelling
-from src.subjectVerbAgreement import SubjVerbAgreement as sva
-from src.sCount import SentenceCount
-from src.svaTree import SubjVerbAgreement
-from src.FeatureAnalysis import FeatureAnalysis
+import sys
+sys.path.insert(0, './')
+from spelling import Spelling
+from subjectVerbAgreement import SubjVerbAgreement as sva
+from sCount import SentenceCount
+from svaTree import SubjVerbAgreement
+from FeatureAnalysis import FeatureAnalysis
 
 if __name__ == "__main__":
     #f = bigram.nGramModel()

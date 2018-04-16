@@ -1,9 +1,10 @@
+import sys
+sys.path.insert(0, './')
 import matplotlib.pyplot as plt1
 import nltk
 
-from src.spelling import Spelling
-from src.sCount import SentenceCount
-from src.FeatureAnalysis import FeatureAnalysis
+
+from FeatureAnalysis import FeatureAnalysis
 #from src.subjectVerbAgreement import SubjVerbAgreement
 from src.svaTree import SubjVerbAgreement
 

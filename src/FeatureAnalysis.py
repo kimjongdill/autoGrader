@@ -152,6 +152,7 @@ class FeatureStruct():
 
         # For S and others Merge what is left
         else:
+
             np = ""
             vp = ""
 
@@ -166,6 +167,12 @@ class FeatureStruct():
                     vp = labels[i]
                     break
 
+            # Check for sentence missing verb
+            if fs.tag == "S":
+                if vp == "" or vp.headVerb == "":
+                    fs.verbError += 1
+
+            # Check subject verb agreement
             if np == "" or vp == "":
                 return fs
 
@@ -194,6 +201,8 @@ class FeatureStruct():
             # Check that verb matches person agreement
             elif vp.headVerb == "VBZ":
                 if not np.person == 3:
+                    fs.svaError += 1
+                elif np.plural == 1:
                     fs.svaError += 1
 
             elif vp.headVerb == "VBP":
@@ -234,6 +243,7 @@ class FeatureAnalysis():
         cleanEssay = self.preProcess(essay)
         sentences = nltk.sent_tokenize(cleanEssay)
         svaCount = 0
+        verbCount = 0
 
         for sentence in sentences:
             #print(sentence)
@@ -241,10 +251,12 @@ class FeatureAnalysis():
 
             # Now we have a parse tree. We can check subject verb agreement for
             # Every S->NP VP in the tree.
-            #parse.pretty_print()
+            parse.pretty_print()
             fs = self.buildFeature(parse)
             svaCount += fs.svaError
-            #print(svaCount)
+            verbCount += fs.verbError
+            print("SVA Error: ", svaCount)
+            print("Verb Error: ", verbCount)
 
         return svaCount / len(sentences)
 

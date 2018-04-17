@@ -55,6 +55,8 @@ class SentenceCount():
         # Plotted clause count vs High/Low using matplotlib
         # Found no High scoring essays had fewer than 35 clauses
         # Found no Low scoring essays had greater than 60 clauses
+
+
         if clauseCount < 35:
             result = 0
         elif(clauseCount < 41):
@@ -69,6 +71,7 @@ class SentenceCount():
             result = 5
 
         return result
+
 
     def rec_count(self, tree):
         # End recursion at leaf node

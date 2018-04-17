@@ -43,6 +43,6 @@ if __name__ == "__main__":
 
         count = stc.scoreSentenceCount(essay)
 
-        plt1.scatter(count[0], score)
+        plt1.scatter(count, score)
 
     plt1.show()

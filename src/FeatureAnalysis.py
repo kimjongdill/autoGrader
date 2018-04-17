@@ -11,9 +11,12 @@ class FeatureStruct():
     plural = ""
     parseRule = ""
     headVerb = ""
+    verbTag = ""
+    verb = False
     noun = 0
     svaError = 0
     verbError = 0
+    tense = ""
 
     # Printing the FS for debugging purposes
     def print(self):
@@ -60,6 +63,11 @@ class FeatureStruct():
 
         if self.tag == "VB":
             self.headVerb = "VB"
+            self.tense = "ambiguous"
+
+        if self.tag in ["VB", "VBD", "VBN", "VBG", "VBZ", "VBP"]:
+            self.verb = True
+            self.verbTag = self.tag
 
         # Special Cases
         if self.word == "i":
@@ -103,6 +111,12 @@ class FeatureStruct():
             fs.svaError += label.svaError
             fs.verbError += label.verbError
 
+        # Things that should merge every time
+        for label in labels:
+            if not label.tense == "":
+                fs.tense = label.tense
+                break
+
         # If this is a noun phrase, determine the right plural, person
         if fs.tag == "NP":
             fs.plural = 0
@@ -134,21 +148,52 @@ class FeatureStruct():
         # For Verb Phrases identify head verb, plural person
         elif fs.tag == "VP":
             if len(labels) == 1:
-                fs.headVerb = labels[0].headVerb
-                fs.specialVerb = labels[0].specialVerb
-                fs.plural = labels[0].specialVerb
-                fs.person = labels[0].person
+                labels[0].svaError = fs.svaError
+                labels[0].verbError = fs.verbError
+                labels[0].word = fs.word
+                fs = labels[0]
 
+
+            # If there is more than one label, skip over the non verb labels
             for label in labels:
-                if not label.headVerb == "":
-                    label.svaError = fs.svaError
-                    label.verbError = fs.verbError
-                    label.word = fs.word
-                    label.tag = fs.tag
-                    return label
+                if label.verb == True:
+                    copyLabel = label
+                    copyLabel.svaError = fs.svaError
+                    copyLabel.verbError = fs.verbError
+                    copyLabel.word = fs.word
+                    copyLabel.tag = fs.tag
+                    copyLabel.tense = fs.tense
+                    fs = copyLabel
+                    break
 
-            fs.verbError += 1
+            # Check for matching tense
+            if not fs.tense == "":
+                for label in labels:
+                    if not label.tense == "":
+                        if not label.tense == fs.tense:
+                            fs.verbError += 1
+
+            # fs.verbError += 1
             # Check for verb errors
+            if fs.specialVerb == "HAVE":
+                for i in range(1, len(labels)):
+                    if labels[i-1].specialVerb == "HAVE":
+                        for j in range(i, len(labels)):
+                            if labels[j].tag == "NP" or labels[j].verbTag == "VBN":
+                                return fs;
+
+                        fs.verbError += 1
+
+            if fs.specialVerb == "BE":
+                for i in range(1, len(labels)):
+                    if labels[i-1].specialVerb == "BE":
+                        for j in range(i, len(labels)):
+                            if labels[j].tag == "NP" or labels[j].tag == "ADJP" or labels[j].verbTag == "VBG":
+                                return fs
+
+                        fs.verbError += 1
+
+
 
         # For S and others Merge what is left
         else:
@@ -162,15 +207,10 @@ class FeatureStruct():
 
             # Find the NP and VP in S->NP VP
             for i in range(1,len(labels)):
-                if(labels[i-1].tag == "NP" and labels[i].tag == "VP"):
+                if(labels[i-1].tag == "NP" and labels[i].tag in ["VP", "VBP", "VBD", "VBZ", "VBN", "VB", "VBG"]):
                     np = labels[i-1]
                     vp = labels[i]
                     break
-
-            # Check for sentence missing verb
-            if fs.tag == "S":
-                if vp == "" or vp.headVerb == "":
-                    fs.verbError += 1
 
             # Check subject verb agreement
             if np == "" or vp == "":
@@ -211,7 +251,13 @@ class FeatureStruct():
 
             # Handle Head Verbs that shouldn't be there.
             elif vp.headVerb == "":
-                fs.svaError += 1
+                fs.verbError += 1
+
+            # Verb Error TO DO
+            # Handle Past Participals - eg Have Eaten
+            #   - Have Verb preceeds VBN
+            # Handle Present Participals - Am eating
+            #   - Be Verb preceeds Gerund or Noun
 
         return fs
 

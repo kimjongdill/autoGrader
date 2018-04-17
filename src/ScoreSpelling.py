@@ -18,7 +18,7 @@ if __name__ == "__main__":
     spellScores = []
 
     # Import the table of contents
-    toc = open("./index.csv", 'r')
+    toc = open("../input/testing/index.csv", 'r')
 
     # Import the table of contents
     lines = toc.readlines()
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     for line in lines:
         line = line.split(';')
-        file = "./essays/" + line[0]
+        file = "../input/testing/essays/" + line[0]
         score = line[2]
 
         if "high"  in score:
@@ -38,10 +38,8 @@ if __name__ == "__main__":
 
         essayFile = open(file, 'r')
         essay = essayFile.read()
-        essay = essay.split()
-        tags = nltk.pos_tag(essay)
+
         spell = Spelling()
-        plt.scatter(spell.spellCheck(tags), score)
-        print
+        plt.scatter(spell.spellCheck(essay), score)
 
     plt.show()

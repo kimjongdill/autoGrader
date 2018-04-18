@@ -297,14 +297,34 @@ class FeatureAnalysis():
 
             # Now we have a parse tree. We can check subject verb agreement for
             # Every S->NP VP in the tree.
-            parse.pretty_print()
-            fs = self.buildFeature(parse)
-            svaCount += fs.svaError
-            verbCount += fs.verbError
-            print("SVA Error: ", svaCount)
-            print("Verb Error: ", verbCount)
+            #parse.pretty_print()
+            try:
+                fs = self.buildFeature(parse)
+                svaCount += fs.svaError
+                verbCount += fs.verbError
+            except:
+                # If the file times out the server then fail 'em
+                svaCount = 5
+                verbCount = 5
+            #print("SVA Error: ", svaCount)
+            #print("Verb Error: ", verbCount)
+            score = 0
 
-        return svaCount / len(sentences)
+        retValues = []
+        for i in [0.3, 0.24, 0.18, 0.12, 0.00]:
+            score += 1
+            if svaCount / len(sentences) >= i:
+                retValues.append(score)
+                break;
+
+        score = 0
+        for i in [1.5, 1.25, 1.0, 0.75, 0.0]:
+            score += 1
+            if verbCount / len(sentences) >= i:
+                retValues.append(score)
+                break;
+
+        return retValues
 
     # Take a parse tree and recursively build feature structures
     def buildFeature(self, tree):

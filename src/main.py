@@ -9,13 +9,20 @@ from FeatureAnalysis import FeatureAnalysis
 if __name__ == "__main__":
     #f = bigram.nGramModel()
 
-    while 1:
+    # Import the table of contents
+    toc = open("../input/testing/index.csv", 'r')
 
-        filename = input("Welcome to the essay scorer. Enter the filename of the essay to score or q to quit: ")
+    resultsFile = open("../output/results.txt", 'w')
 
-        if filename == "q":
-            print("Goodbye")
-            break
+    # Import the table of contents
+    lines = toc.readlines()
+
+    # Skip the title line
+    lines.pop(0)
+
+    for line in lines:
+        line = line.split(';')
+        filename = line[0]
 
         try:
             file = open("../input/testing/essays/"+filename)
@@ -34,12 +41,30 @@ if __name__ == "__main__":
         stc = SentenceCount()
         feat = FeatureAnalysis()
 
-        print("Spelling score (0-4): " + str(spell.spellCheck(essay)))
-        print("Sentence Count: ", stc.scoreSentenceCount(essay))
-        print("Bad SVA Count: ", feat.analyze(essay))
-        # print("Grammar score (5-0): " + str(sva.scoreAgreement(essay)))
+        spellingScore = str(spell.spellCheck(essay))
+        sentenceScore = stc.scoreSentenceCount(essay)
+
+        verbScores = feat.analyze(essay)
+        svaScore = verbScores[0]
+        verbScore = verbScores[1]
+
+
+
+
+        reportString = filename + ";" + str(spellingScore) + ";" + str(sentenceScore) + ";" + str(svaScore) + ";" + \
+                       str(verbScore) + ";0;0;0;0;unknown\n"
+
+        resultsFile.write(reportString)
+        resultsFile.flush()
+        print(reportString)
+
+        # print("Spelling score (0-4): " + str(spell.spellCheck(essay)))
+        # print("Sentence Count: ", stc.scoreSentenceCount(essay))
+        # print("Bad SVA Count: ", feat.analyze(essay))
+        # # print("Grammar score (5-0): " + str(sva.scoreAgreement(essay)))
 
 
         #print(tags)
+    resultsFile.close()
 
 

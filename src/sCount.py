@@ -48,10 +48,12 @@ class SentenceCount():
 
         for sentence in sentences:
             #print(sentence)
-            (parse, ) = self.parser.raw_parse(sentence)
-            #parse.pretty_print()
-            clauseCount += self.rec_count(parse)
-
+            try:
+                (parse, ) = self.parser.raw_parse(sentence)
+                #parse.pretty_print()
+                clauseCount += self.rec_count(parse)
+            except:
+                clauseCount = 0
         # Plotted clause count vs High/Low using matplotlib
         # Found no High scoring essays had fewer than 35 clauses
         # Found no Low scoring essays had greater than 60 clauses

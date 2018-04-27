@@ -1,0 +1,71 @@
+from __future__ import print_function
+import numpy as np
+import statsmodels.api as sm
+import pandas
+
+
+def translate(x):
+    if x == "high":
+        return 1;
+    return 0;
+
+def compositeScore(x):
+    if model.predict(params=params, exog=x.values, linear=True) > 0:
+        return 1
+    return 0
+
+def truePositive(x):
+    if x['human_score'] == 1 and x['computer_score'] == 1:
+        return 1
+    return 0
+
+def falsePositive(x):
+    if x['human_score'] == 0 and x['computer_score'] == 1:
+        return 1
+    return 0
+
+def falseNegative(x):
+    if x['human_score'] == 1 and x['computer_score'] == 0:
+        return 1
+    return 0;
+
+scores = pandas.read_csv("../output/int_results.txt", ";")
+scores = scores.drop([' Formation', ' Coherence', ' Blah','Filename',' Composite', ' Score'], axis=1)
+
+
+results = pandas.read_csv("../input/training/index.csv", ";")
+results = results['grade']
+results = results.apply(translate)
+
+depVar = results.values
+indVar = scores.values
+
+print(depVar)
+print(indVar)
+
+model = sm.Probit(depVar, indVar)
+result = model.fit()
+
+params = result.params
+
+# Calculate Fit Statistics
+
+scores['computer_score'] = scores.apply(compositeScore, axis=1)
+scores['human_score'] = results
+scores['true_positive'] = scores.apply(truePositive, axis=1)
+scores['false_positive'] = scores.apply(falsePositive, axis=1)
+scores['false_negative'] = scores.apply(falseNegative, axis=1)
+
+tp = scores['true_positive'].sum()
+fp = scores['false_positive'].sum()
+fn = scores['false_negative'].sum()
+
+precision = tp / (tp + fp)
+recall = tp / (tp + fn)
+
+print("Precision: ", precision)
+print("Recall: ", recall)
+
+
+print("Goodbye")
+

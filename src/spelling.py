@@ -142,6 +142,8 @@ class Spelling():
 
         pcError = 100 * self.numErrors / self.numWords
 
+        return pcError
+
         if pcError > 5.0 :
             return 4;
         elif pcError > 4.0 :

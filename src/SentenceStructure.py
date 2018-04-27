@@ -30,21 +30,21 @@ class SentenceStructure():
             sentence = sentence.replace("."," ")        #get different results when i get rid of the period
             try:
                 (parse,) = self.parser.raw_parse(sentence)
-                parse.pretty_print()
+                #parse.pretty_print()
             except:
                 parse = ""
 
             try:
                 if parse[0]._label == 'SBAR':           # if the root is an SBAR then it is incomplete
-                    print "Found a SBAR",sentence
+                    #print "Found a SBAR",sentence
                     formCount = formCount + 1
             
                 elif parse[0]._label == 'FRAG':         # if the root is a fragment it is incomplete
-                    print "Found FRAG",sentence
+                    #print "Found FRAG",sentence
                     formCount = formCount + 1
 
                 elif parse[0]._label == 'PP':           # If the root is a PP, (For the bus all morning)
-                    print "Found PP",sentence
+                    #print "Found PP",sentence
                     formCount = formCount + 1
 
                 elif parse[0]._label == 'SINV':
@@ -57,7 +57,7 @@ class SentenceStructure():
 
                 labelLength = len(subtreeLabels)
                 if subtreeLabels[labelLength-1] in ['CC','IN','DT']:
-                    print "Found CC or IN at end"
+                    #print "Found CC or IN at end"
                     formCount = formCount + 1
 
                 for i in range(labelLength):
@@ -74,13 +74,13 @@ class SentenceStructure():
                     if subtreeLabels[i] in ['VBD','VBP','VB','VBZ','VBN','VBG']:
                         sawVerb = 1
                         if sawSubject == 0:
-                            print "Got a verb before a subject"
+                            #print "Got a verb before a subject"
                             formCount = formCount + 1
                 if sawVerb == 0:
                     formCount = formCount + 1
 
             except:
-                print "null"
+                print ("null")
             #print formCount
 
         return formCount
@@ -131,5 +131,5 @@ if __name__ == "__main__":
     # plt1.show()
 
 
-    print "Sentence syntax errors",count
+    #print "Sentence syntax errors",count
     print("Exited")

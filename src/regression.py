@@ -1,8 +1,9 @@
-from __future__ import print_function
+#from __future__ import print_function
 import numpy as np
 import statsmodels.api as sm
 import pandas
 
+# Lambda functions for working with data frame
 
 def translate(x):
     if x == "high":
@@ -29,8 +30,8 @@ def falseNegative(x):
         return 1
     return 0;
 
-scores = pandas.read_csv("../output/int_results.txt", ";")
-scores = scores.drop([' Formation', ' Coherence', ' Blah','Filename',' Composite', ' Score'], axis=1)
+scores = pandas.read_csv("../output/results.txt", ";")
+scores = scores.drop([' Coherence', ' Blah','Filename',' Composite', ' Score'], axis=1)
 
 
 results = pandas.read_csv("../input/training/index.csv", ";")
@@ -40,8 +41,6 @@ results = results.apply(translate)
 depVar = results.values
 indVar = scores.values
 
-print(depVar)
-print(indVar)
 
 model = sm.Probit(depVar, indVar)
 result = model.fit()

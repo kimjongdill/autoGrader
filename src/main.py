@@ -5,9 +5,17 @@ from subjectVerbAgreement import SubjVerbAgreement as sva
 from sCount import SentenceCount
 from svaTree import SubjVerbAgreement
 from FeatureAnalysis import FeatureAnalysis
+from SentenceStructure import SentenceStructure
+
+import nltk
 
 if __name__ == "__main__":
-    #f = bigram.nGramModel()
+
+    # Download required nltk corpora
+    try:
+        nltk.download('words')
+    except:
+        print("This program requires nltk and its words corpus to run.")
 
     # Import the table of contents
     toc = open("../input/testing/index.csv", 'r')
@@ -40,23 +48,22 @@ if __name__ == "__main__":
         spell = Spelling()
         stc = SentenceCount()
         feat = FeatureAnalysis()
+        struct = SentenceStructure()
 
         spellingScore = str(spell.spellCheck(essay))
         sentenceScore = stc.scoreSentenceCount(essay)
+        sentenceStruct = struct.scoreFormCounts(essay)
 
         verbScores = feat.analyze(essay)
         svaScore = verbScores[0]
         verbScore = verbScores[1]
 
-
-
-
         reportString = filename + ";" + str(spellingScore) + ";" + str(sentenceScore) + ";" + str(svaScore) + ";" + \
-                       str(verbScore) + ";0;0;0;0;unknown\n"
+                       str(verbScore) + ";" + str(sentenceStruct) + ";0;0;0;unknown\n"
 
         resultsFile.write(reportString)
         resultsFile.flush()
-        print(reportString)
+        #print(reportString)
 
         # print("Spelling score (0-4): " + str(spell.spellCheck(essay)))
         # print("Sentence Count: ", stc.scoreSentenceCount(essay))

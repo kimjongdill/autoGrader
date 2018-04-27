@@ -3,21 +3,15 @@
 # Install nltk
 pip install nltk
 
-# Startup stanford coreNLP server
-cd ../src/stanford-corenlp-full-2018-02-27
-
-nohup java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000 &
-
 # Ensure the server is running before opening python
+echo "Checking for Stanford Core NLP Server..."
 while ! nc -z localhost 9000; do
+    echo "Waiting for Stanford Core NLP Server at http://localhost:9000"
     sleep 0.1
 done
-
-# Navigate back to execution folder
-cd ..
-cd ../executable
+echo "Done!\n"
 
 # Open and run our script
+echo "Writing scores to ../output/results.txt..."
 python3 ../src/main.py
-
-# On exit close the server
+echo " Done!"

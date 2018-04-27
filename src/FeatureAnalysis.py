@@ -264,9 +264,11 @@ class FeatureStruct():
 
 class FeatureAnalysis():
     parser = ""
+    depParser = ""
 
     def __init__(self):
         self.parser = nltk.CoreNLPParser(url="http://localhost:9000")
+        #self.depParser = nltk.CoreNLPDependencyParser(url="http://localhost:9000")
         return;
 
     # Comb through text and ensure that periods and commas have a space after them.
@@ -294,7 +296,9 @@ class FeatureAnalysis():
         for sentence in sentences:
             #print(sentence)
             (parse, ) = self.parser.raw_parse(sentence)
+            #depParse, = self.depParser.raw_parse(sentence)
 
+            #print(depParse.to_conll(4))
             # Now we have a parse tree. We can check subject verb agreement for
             # Every S->NP VP in the tree.
             #parse.pretty_print()
@@ -311,6 +315,7 @@ class FeatureAnalysis():
             score = 0
 
         retValues = []
+        """
         for i in [0.3, 0.24, 0.18, 0.12, 0.00]:
             score += 1
             if svaCount / len(sentences) >= i:
@@ -323,6 +328,9 @@ class FeatureAnalysis():
             if verbCount / len(sentences) >= i:
                 retValues.append(score)
                 break;
+        """
+        retValues.append(svaCount/len(sentences))
+        retValues.append(verbCount/len(sentences))
 
         return retValues
 

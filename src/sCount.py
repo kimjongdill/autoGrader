@@ -58,6 +58,7 @@ class SentenceCount():
         # Found no High scoring essays had fewer than 35 clauses
         # Found no Low scoring essays had greater than 60 clauses
 
+        return clauseCount
 
         if clauseCount < 35:
             result = 0

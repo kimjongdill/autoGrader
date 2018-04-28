@@ -11,9 +11,7 @@ def translate(x):
     return 0;
 
 def compositeScore(x):
-
-    #if myModel.predict(params=params, exog=x.values, linear=True) > 0:
-    if sm.Probit.predict(params=params, exog=x.values, linear=True) > 0:
+    if model.predict(params=params, exog=x.values, linear=True) > 0:
         return 1
     return 0
 
@@ -32,8 +30,8 @@ def falseNegative(x):
         return 1
     return 0;
 
-scores = pandas.read_csv("../output/df_results.txt", ";")
-scores = scores.drop(["file_name", "coherence", "relevance"], axis=1)
+scores = pandas.read_csv("../input/training/results.txt", ";", index_col=0)
+scores = scores.drop(["file_name", "final_score"], axis=1)
 
 
 results = pandas.read_csv("../input/training/index.csv", ";")

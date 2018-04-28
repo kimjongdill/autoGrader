@@ -63,7 +63,12 @@ def vbMap(x):
     return score
 
 def wellMap(x):
-    return x
+    score = 0
+    for i in [0.5, 0.4, 0.3, 0.2, 0.1]:
+        score += 1
+        if x >= i:
+            break;
+    return score
 
 def sumRow(x):
     vals = x.drop(["file_name", "final_score"]).values
@@ -100,8 +105,8 @@ if __name__ == "__main__":
 
     # Get the score from the regression model. This is hard coded from previously done
     # Run the regression model on cached data
-    scores = pandas.read_csv("../input/training/df_results.txt", ";", index_col=0)
-    scores = scores.drop(["file_name", "coherence", "relevance"], axis=1)
+    scores = pandas.read_csv("../input/training/results.txt", ";", index_col=0)
+    scores = scores.drop(["file_name", "final_score"], axis=1)
 
     results = pandas.read_csv("../input/training/index.csv", ";")
     results = results['grade']
@@ -168,17 +173,20 @@ if __name__ == "__main__":
                                                else "Low", axis=1)
 
     # Translate scores to 1 - 5
+
     resultsdf['spelling'] = resultsdf['spelling'].apply(spellMap)
     resultsdf['sentence_count'] = resultsdf['sentence_count'].apply(countMap)
     resultsdf['subject_verb_agreement'] = resultsdf['subject_verb_agreement'].apply(svaMap)
     resultsdf['verb_usage'] = resultsdf['verb_usage'].apply(vbMap)
     resultsdf['well_formedness'] = resultsdf['well_formedness'].apply(wellMap)
+    
 
     # Sum the 1 - 5 Scores
     resultsdf['sum'] = resultsdf.apply(sumRow, axis=1)
     sum = resultsdf['sum']
     resultsdf = resultsdf.drop("sum", axis=1)
     resultsdf.insert(6, 'sum', sum)
+
 
     resultsdf.to_csv("../output/results.txt", ";", index=False, header=False)
 

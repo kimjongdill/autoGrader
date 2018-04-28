@@ -60,20 +60,7 @@ class SentenceCount():
 
         return clauseCount
 
-        if clauseCount < 35:
-            result = 0
-        elif(clauseCount < 41):
-            result = 1
-        elif(clauseCount < 47):
-            result = 2
-        elif(clauseCount < 53):
-            result = 3
-        elif(clauseCount < 60):
-            result = 4
-        else:
-            result = 5
 
-        return result
 
 
     def rec_count(self, tree):

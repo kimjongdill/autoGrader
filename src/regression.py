@@ -30,8 +30,8 @@ def falseNegative(x):
         return 1
     return 0;
 
-scores = pandas.read_csv("../output/results.txt", ";")
-scores = scores.drop([' Coherence', ' Blah','Filename',' Composite', ' Score'], axis=1)
+scores = pandas.read_csv("../input/training/results.txt", ";", index_col=0)
+scores = scores.drop(["file_name", "final_score"], axis=1)
 
 
 results = pandas.read_csv("../input/training/index.csv", ";")
@@ -46,6 +46,8 @@ model = sm.Probit(depVar, indVar)
 result = model.fit()
 
 params = result.params
+
+print(params)
 
 # Calculate Fit Statistics
 

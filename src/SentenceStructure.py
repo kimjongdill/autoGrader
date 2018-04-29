@@ -77,7 +77,7 @@ class SentenceStructure():
 
 
 
-        return formCount
+        return formCount / len(sentences)
 
 
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
          print(line)
          file = "../input/testing/essays/" + line[0]
          score = line[2]
-         print line[0]
+         print (line[0])
 
          if "high" in score:
              score = 1

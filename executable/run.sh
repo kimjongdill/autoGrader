@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Install nltk
+# Install required packages
 pip install nltk
+pip install
 
 # Ensure the server is running before opening python
 echo "Checking for Stanford Core NLP Server..."

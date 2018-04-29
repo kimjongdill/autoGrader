@@ -144,15 +144,3 @@ class Spelling():
 
         return pcError
 
-        if pcError > 5.0 :
-            return 4;
-        elif pcError > 4.0 :
-            return 3;
-        elif pcError > 3.0 :
-            return 3;
-        elif pcError > 2.0 :
-            return 2;
-        elif pcError > 1.0 :
-            return 1
-        else:
-            return 0;

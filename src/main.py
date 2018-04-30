@@ -6,6 +6,7 @@ from sCount import SentenceCount
 from svaTree import SubjVerbAgreement
 from FeatureAnalysis import FeatureAnalysis
 from SentenceStructure import SentenceStructure
+from Coherence import Coherence
 
 import statsmodels.api as sm
 import pandas
@@ -106,7 +107,7 @@ if __name__ == "__main__":
     # Get the score from the regression model. This is hard coded from previously done
     # Run the regression model on cached data
     scores = pandas.read_csv("../input/training/results.txt", ";", index_col=0)
-    scores = scores.drop(["file_name", "final_score"], axis=1)
+    scores = scores.drop(["file_name"], axis=1)
 
     results = pandas.read_csv("../input/training/index.csv", ";")
     results = results['grade']
@@ -144,6 +145,7 @@ if __name__ == "__main__":
         stc = SentenceCount()
         feat = FeatureAnalysis()
         struct = SentenceStructure()
+        co = Coherence()
 
         spellingScore = spell.spellCheck(essay)
         sentenceScore = stc.scoreSentenceCount(essay)
@@ -152,16 +154,16 @@ if __name__ == "__main__":
         verbScores = feat.analyze(essay)
         svaScore = verbScores[0]
         verbScore = verbScores[1]
-        coherence = random.randint(1,5)
+        coherence = co.scoreCoherence(essay);
         relevance = random.randint(1,5)
 
         # Add Coherence and Relevance Later
-        results.append([filename, spellingScore, sentenceScore, svaScore, verbScore, sentenceStruct])
+        results.append([filename, spellingScore, sentenceScore, svaScore, verbScore, sentenceStruct, coherence])
 
 
     # Add coherence and relevance later
     resultsdf = pandas.DataFrame(results, columns=["file_name", "spelling", "sentence_count", "subject_verb_agreement",
-                                        "verb_usage", "well_formedness"])
+                                        "verb_usage", "well_formedness", "coherence"])
 
     #print(resultsdf)
     #process = resultsdf.drop("file_name", axis=1)
@@ -171,23 +173,27 @@ if __name__ == "__main__":
                                                                                  exog=x.drop("file_name").values,
                                                                                  linear=True) > 0
                                                else "Low", axis=1)
-
+    
     # Translate scores to 1 - 5
-
+    
     resultsdf['spelling'] = resultsdf['spelling'].apply(spellMap)
     resultsdf['sentence_count'] = resultsdf['sentence_count'].apply(countMap)
     resultsdf['subject_verb_agreement'] = resultsdf['subject_verb_agreement'].apply(svaMap)
     resultsdf['verb_usage'] = resultsdf['verb_usage'].apply(vbMap)
     resultsdf['well_formedness'] = resultsdf['well_formedness'].apply(wellMap)
-    
+    resultsdf['coherence'] = resultsdf['coherence'].apply(lambda x: 1 if x >= 4 else 5 - x )
+
+    # Insert Relevance
+
+    resultsdf.insert(7, 'relevance', 0)
 
     # Sum the 1 - 5 Scores
     resultsdf['sum'] = resultsdf.apply(sumRow, axis=1)
     sum = resultsdf['sum']
     resultsdf = resultsdf.drop("sum", axis=1)
-    resultsdf.insert(6, 'sum', sum)
+    resultsdf.insert(8, 'sum', sum)
 
 
-    resultsdf.to_csv("../output/results.txt", ";", index=False, header=False)
+    resultsdf.to_csv("../output/results.txt", ";", index=False, header=True)
 
     # Clean up the file

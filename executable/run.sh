@@ -2,7 +2,9 @@
 
 # Install required packages
 pip install nltk
-pip install
+pip install inflect
+pip install re
+pip install statsmodels
 
 # Ensure the server is running before opening python
 echo "Checking for Stanford Core NLP Server..."

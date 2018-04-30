@@ -31,7 +31,7 @@ def falseNegative(x):
     return 0;
 
 scores = pandas.read_csv("../input/training/results.txt", ";", index_col=0)
-scores = scores.drop(["file_name", "final_score"], axis=1)
+scores = scores.drop(["file_name"], axis=1)
 
 
 results = pandas.read_csv("../input/training/index.csv", ";")

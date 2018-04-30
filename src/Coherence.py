@@ -53,7 +53,7 @@ class Coherence():
         for sentence in sentences:
             parse = self.depParser.raw_parse(sentence)
             classifier = self.theClassifier()
-            dep = parse.next()
+            dep = next(parse)
             processedList = list(dep.triples())
             subjectList = []
             sawFemale = 0
@@ -156,7 +156,7 @@ if __name__ == "__main__":
          print(line)
          file = "../input/testing/essays/" + line[0]
          score = line[2]
-         print line[0]
+         print (line[0])
 
          if "high" in score:
              score = 1
@@ -166,7 +166,7 @@ if __name__ == "__main__":
          essayFile = open(file, 'r')
          essay = essayFile.read()
          count = sCoherence.scoreCoherence(essay)
-         print count
+         print (count)
 
 
     print("Exited")

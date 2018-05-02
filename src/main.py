@@ -7,6 +7,7 @@ from svaTree import SubjVerbAgreement
 from FeatureAnalysis import FeatureAnalysis
 from SentenceStructure import SentenceStructure
 from Coherence import Coherence
+from topic_coherence import Topic_Coherence
 
 import statsmodels.api as sm
 import pandas
@@ -68,6 +69,14 @@ def wellMap(x):
     for i in [0.5, 0.4, 0.3, 0.2, 0.1]:
         score += 1
         if x >= i:
+            break;
+    return score
+
+def relMap(x):
+    score = 0
+    for i in [0.9, 1.025, 1.15, 1.275, 1.4]:
+        score += 1
+        if x <= i:
             break;
     return score
 
@@ -146,6 +155,7 @@ if __name__ == "__main__":
         feat = FeatureAnalysis()
         struct = SentenceStructure()
         co = Coherence()
+        tc = Topic_Coherence()
 
         spellingScore = spell.spellCheck(essay)
         sentenceScore = stc.scoreSentenceCount(essay)
@@ -155,15 +165,15 @@ if __name__ == "__main__":
         svaScore = verbScores[0]
         verbScore = verbScores[1]
         coherence = co.scoreCoherence(essay);
-        relevance = random.randint(1,5)
+        relevance = tc.score_topic_coherence(line[1], essay)
 
         # Add Coherence and Relevance Later
-        results.append([filename, spellingScore, sentenceScore, svaScore, verbScore, sentenceStruct, coherence])
+        results.append([filename, spellingScore, sentenceScore, svaScore, verbScore, sentenceStruct, coherence, relevance])
 
 
     # Add coherence and relevance later
     resultsdf = pandas.DataFrame(results, columns=["file_name", "spelling", "sentence_count", "subject_verb_agreement",
-                                        "verb_usage", "well_formedness", "coherence"])
+                                        "verb_usage", "well_formedness", "coherence", "relevance"])
 
     #print(resultsdf)
     #process = resultsdf.drop("file_name", axis=1)
@@ -182,10 +192,10 @@ if __name__ == "__main__":
     resultsdf['verb_usage'] = resultsdf['verb_usage'].apply(vbMap)
     resultsdf['well_formedness'] = resultsdf['well_formedness'].apply(wellMap)
     resultsdf['coherence'] = resultsdf['coherence'].apply(lambda x: 1 if x >= 4 else 5 - x )
+    resultsdf['relevance'] = resultsdf['relevance'].apply(relMap)
 
     # Insert Relevance
 
-    resultsdf.insert(7, 'relevance', 0)
 
     # Sum the 1 - 5 Scores
     resultsdf['sum'] = resultsdf.apply(sumRow, axis=1)
